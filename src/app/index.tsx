@@ -1,98 +1,150 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useQuery } from "@apollo/client";
+import { router } from "expo-router";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+
+import { SEARCH_NEWS } from "../graphql/queries";
 
 export default function HomeScreen() {
+  const [search, setSearch] = useState("");
+
+  const { loading, error, data } = useQuery(
+    SEARCH_NEWS,
+    {
+      variables: {
+        search,
+      },
+    }
+  );
+
+  if (loading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+        }}
+      >
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <Text>
+        Error: {error.message}
+      </Text>
+    );
+  }
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <View
+      style={{
+        flex: 1,
+        paddingTop: 50,
+      }}
+    >
+      <TextInput
+        placeholder="Search News..."
+        value={search}
+        onChangeText={setSearch}
+        style={{
+          margin: 15,
+          padding: 12,
+          borderWidth: 1,
+          borderRadius: 10,
+        }}
+      />
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <FlatList
+        data={data?.articles || []}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() =>
+              router.push(
+                `/article/${item.id}`
+              )
+            }
+            style={{
+              marginHorizontal: 15,
+              marginBottom: 20,
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              overflow: "hidden",
+              elevation: 3,
+            }}
+          >
+            {item.image && (
+              <Image
+                source={{
+                  uri: item.image,
+                }}
+                style={{
+                  width: "100%",
+                  height: 200,
+                }}
+              />
+            )}
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+            <View
+              style={{
+                padding: 15,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                }}
+              >
+                {item.title}
+              </Text>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+              <Text
+                numberOfLines={2}
+                style={{
+                  marginTop: 5,
+                }}
+              >
+                {item.description}
+              </Text>
+
+              <Text
+                style={{
+                  color: "gray",
+                  marginTop: 10,
+                }}
+              >
+                {item.source}
+              </Text>
+
+              <Text
+                style={{
+                  color: "gray",
+                  fontSize: 12,
+                  marginTop: 5,
+                }}
+              >
+                {new Date(
+                  item.publishedAt
+                ).toLocaleDateString()}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
-});
