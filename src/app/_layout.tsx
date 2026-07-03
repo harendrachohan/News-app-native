@@ -1,21 +1,25 @@
+import { client } from "@/lib/apollo";
+import { ApolloProvider } from "@apollo/client";
 import { Stack } from "expo-router";
 
-export default function Layout() {
+export default function RootLayout() {
   return (
-    <Stack>
+    <ApolloProvider client={client}>
+  <Stack>
       <Stack.Screen
         name="index"
         options={{
-          title: "News",
+          title: "Latest News",
         }}
       />
 
       <Stack.Screen
         name="article/[id]"
         options={{
-          headerShown: false,
+          title: "Article",
         }}
       />
     </Stack>
+    </ApolloProvider>
   );
 }

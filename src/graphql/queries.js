@@ -1,14 +1,19 @@
 import { gql } from "@apollo/client";
 
 export const SEARCH_NEWS = gql`
-  query SearchNews($search: String) {
-    articles(search: $search) {
-      id
-      title
-      description
-      image
-      source
-      publishedAt
+  query SearchNews($page: Int, $limit: Int!, $category: String!) {
+    articles(page: $page, limit: $limit, category: $category) {
+      page
+      limit
+      data {
+        id
+        title
+        url
+        summary
+        publishedAt
+        imageUrl
+        category
+      }
     }
   }
 `;
@@ -19,11 +24,12 @@ export const GET_ARTICLE = gql`
     article(id: $id) {
       id
       title
-      image
+      url
       content
-      source
-      category
+      summary
       publishedAt
+      imageUrl
+      category
     }
   }
 `;
