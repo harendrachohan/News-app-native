@@ -5,7 +5,7 @@ import { Stack } from "expo-router";
 export default function RootLayout() {
   return (
     <ApolloProvider client={client}>
-  <Stack>
+  <Stack screenOptions={{ headerTitleAlign: "center" }}>
       <Stack.Screen
         name="index"
         options={{

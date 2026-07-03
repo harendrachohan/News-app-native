@@ -89,6 +89,9 @@ export default function NewsCard({ article, index, onPress }: any) {
                 year: "numeric",
               })}
             </Text>
+            <View style={styles.readMoreButton}>
+              <Text style={styles.readMoreText}>Read More →</Text>
+            </View>
           </View>
         </View>
       </Pressable>
@@ -170,5 +173,18 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 12,
     color: "#AEB2B7",
+  },
+  readMoreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F6FF",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  readMoreText: {
+    color: "#007AFF",
+    fontSize: 12,
+    fontWeight: "700",
   },
 });
